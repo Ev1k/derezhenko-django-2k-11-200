@@ -28,16 +28,17 @@ class AuthForm(forms.Form):
     password = forms.CharField(widget=forms.PasswordInput())
 
 
-class AddPostForm(forms.Form):
-    title = forms.CharField()
-    text = forms.CharField()
-
+class AddPostForm(forms.ModelForm):
     class Meta:
         model = Post
         fields = ('title', 'text')
 
     def save(self, commit=True):
-        self.instance.user = self.initial['user']
-        return super.save(commit)
+        post = super(AddPostForm, self).save(commit=False)
+        if not self.instance.pk:
+            post.user = self.initial['user']
+        if commit:
+            post.save()
+        return post
 
 

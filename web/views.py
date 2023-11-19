@@ -1,7 +1,9 @@
+import requests
+
 from datetime import datetime
 
 from django.contrib.auth import get_user_model, authenticate, login, logout
-from django.shortcuts import render, redirect
+from django.shortcuts import render, redirect, get_object_or_404
 
 from web.forms import RegistrationForm, AuthForm, AddPostForm
 from web.models import Post
@@ -73,18 +75,16 @@ def add_post_view(request):
 
 
 def edit_post_view(request, id=None):
-    post = Post.objects.get(id=id) if id is not None else None
-    form = AddPostForm(initial=post)
+    post = get_object_or_404(Post, id=id)
     if request.method == 'POST':
-        form = AddPostForm(data=request.POST, initial={"user": request.user})
+        form = AddPostForm(request.POST, instance=post)
         if form.is_valid():
-            post = Post(
-                title=form.cleaned_data['title'],
-                text=form.cleaned_data['text'],
-                author_id=request.user.id
-            )
-            post.save()
-            print(form.cleaned_data)
+            edited_post = form.save(commit=False)
+            edited_post.user = request.user
+            edited_post.save()
             return redirect("main")
+    else:
+        form = AddPostForm(instance=post)
     return render(request, "web/post_form.html", {"form": form})
+
 

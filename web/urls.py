@@ -8,6 +8,6 @@ urlpatterns = [
     path("registration/", registration_view, name="registration"),
     path("auth/", auth_view, name="auth"),
     path("logout/", logout_view, name="logout"),
-    path("posts/add/", edit_post_view, name="posts_add"),
+    path("posts/add/", add_post_view, name="posts_add"),
     path("posts/<int:id>/", edit_post_view, name="posts_edit")
 ]
