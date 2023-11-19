@@ -22,7 +22,7 @@ class Comment(models.Model):
 
 class New(models.Model):
     author = models.ForeignKey(User, on_delete=models.CASCADE, related_name="news")
-    photo = models.ImageField(upload_to='news_photo/', null=True, blank=True)
+    photo = models.ImageField(upload_to="news_photo/", null=True, blank=True)
     title = models.CharField(max_length=128)
     description = models.TextField()
     date = models.DateTimeField()
