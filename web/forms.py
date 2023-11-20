@@ -14,7 +14,7 @@ class RegistrationForm(forms.ModelForm):
 
     def clean(self):
         cleaned_data = super().clean()
-        if cleaned_data['password'] != cleaned_data['password2']:
+        if cleaned_data["password"] != cleaned_data["password2"]:
             self.add_error("password", "Пароли не совпадают")
         return cleaned_data
 
@@ -31,14 +31,12 @@ class AuthForm(forms.Form):
 class AddPostForm(forms.ModelForm):
     class Meta:
         model = Post
-        fields = ('title', 'text')
+        fields = ("title", "text")
 
     def save(self, commit=True):
         post = super(AddPostForm, self).save(commit=False)
         if not self.instance.pk:
-            post.user = self.initial['user']
+            post.user = self.initial["user"]
         if commit:
             post.save()
         return post
-
-
