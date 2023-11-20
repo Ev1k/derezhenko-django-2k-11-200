@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Forum</title>
+</head>
+<body>
+<h1><a href="{% url 'main' %}">Forum</a></h1>
+<nav>
+    <a href="{% url 'main' %}">Главная</a>
+    {% if user.is_anonymous %}
+        <a href="{% url 'auth' %}">Вход</a>
+        <a href="{% url 'registration' %}">Регистрация</a>
+    {% else %}
+        <a href="{% url 'logout'%}">Выход</a>
+    {% endif %}
+</nav>
+<hr>
+{% block content %} {% endblock %}
+</body>
+</html>
