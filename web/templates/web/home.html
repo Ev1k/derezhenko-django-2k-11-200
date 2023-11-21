@@ -5,19 +5,51 @@ Hello! {{year}}
 <p>Привет <b></b></p>
 {% endif %}
 
-<a href="{% url 'posts_add' %}">Создать пост</a>
+<b>Создать пост</b>
+<form action="{% url 'posts_add' %}" method="post">
+    {% csrf_token %}
+    {{ form.as_p }}
+    <button>Сохранить</button>
+</form>
 
-{% for post in posts%}
-<br>
-<br>
-<article>
-    <b>{{ post.title }}</b>
+<hr>
+<form action="">
+    <b>Фильтр:</b><br>
+    {% for field in filter_form %}
+        {{ field }}
+    {% endfor %}
+    <button>Найти</button>
+</form>
+
+<ul>
+    {% for post in posts%}
     <br>
-    {{ post.text }}
     <br>
-    <small>{{post.date}}</small>
-    <a href="{% url 'posts_edit' post.id %}">редактировать</a>
-</article>
-{% endfor %}
+    <article>
+        <h2>{{ post.author }}</h2>
+        <b>{{ post.title }}</b>
+        <br>
+        {{ post.text }}
+        <br>
+        <small>{{post.date}}</small>
+        <a href="{% url 'posts_edit' post.id %}">редактировать</a>
+    </article>
+    {% endfor %}
+</ul>
+
+Всего {{ total_count }} постов
+<nav>
+    {% if posts.has_previous %}
+        <a href="/?page=1">в начало</a>
+        <a href="?page={{ posts.previous_page_number }}">предыдущая страница</a>
+    {% endif %}
+
+    страница {{ posts.number }} из {{ posts.paginator.num_pages }}
+
+    {% if posts.has_hext %}
+    <a href="/?page={{ posts.previous_page_number }}">предыдущая страница</a>
+    <a href="?page={{ posts.paginator.num_pages }}">в конец</a>
+    {% endif %}
+</nav>
 
 {% endblock %}

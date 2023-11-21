@@ -48,6 +48,7 @@ MIDDLEWARE = [
     "django.contrib.auth.middleware.AuthenticationMiddleware",
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
+    "forum.debug.SqlPrintingMiddleware",
 ]
 
 ROOT_URLCONF = "forum.urls"
@@ -126,3 +127,6 @@ STATIC_URL = "static/"
 # https://docs.djangoproject.com/en/4.2/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
+
+LOGIN_URL = "auth"
+LOGIN_REDIRECT_URL = "main"
