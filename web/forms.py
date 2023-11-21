@@ -40,3 +40,7 @@ class AddPostForm(forms.ModelForm):
         if commit:
             post.save()
         return post
+
+
+class PostFilterForm(forms.Form):
+    search = forms.CharField(widget=forms.TextInput(attrs={"placeholder": "Поиск"}))

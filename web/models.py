@@ -12,6 +12,13 @@ class Post(models.Model):
     date = models.DateTimeField(auto_now_add=True)
     likes = models.ManyToManyField(User)
 
+    def __str__(self):
+        return self.title
+
+    class Meta:
+        verbose_name = "Пост"
+        verbose_name_plural = "Посты"
+
 
 class Comment(models.Model):
     post = models.ForeignKey(Post, on_delete=models.CASCADE, related_name="comments")

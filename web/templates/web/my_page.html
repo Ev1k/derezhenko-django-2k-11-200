@@ -1,0 +1,28 @@
+{%extends 'web/base.html' %}
+{% block content %}
+{% if user.is_authorised %}
+<h3>{% request.user.username %}</h3>
+{% endif %}
+<b>Создать пост</b>
+<form action="{% url 'posts_add' %}" method="post">
+    {% csrf_token %}
+    {{ form.as_p }}
+    <button>Сохранить</button>
+</form>
+<!-- <a href="{% url 'posts_add' %}">Создать пост</a> -->
+<ul>
+    {% for post in posts%}
+    <br>
+    <br>
+    <article>
+        <b>{{ post.title }}</b>
+        <br>
+        {{ post.text }}
+        <br>
+        <small>{{post.date}}</small>
+        <a href="{% url 'posts_edit' post.id %}">редактировать</a>
+    </article>
+    {% endfor %}
+</ul>
+
+{% endblock %}

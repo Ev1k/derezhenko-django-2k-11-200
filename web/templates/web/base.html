@@ -12,6 +12,8 @@
         <a href="{% url 'auth' %}">Вход</a>
         <a href="{% url 'registration' %}">Регистрация</a>
     {% else %}
+        <a href="{% url 'analytics'%}">Аналитика</a>
+        <a href="{% url 'my_page'%}">Моя страница</a>
         <a href="{% url 'logout'%}">Выход</a>
     {% endif %}
 </nav>
