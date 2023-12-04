@@ -4,16 +4,26 @@ from django.contrib.auth import get_user_model, authenticate, login, logout
 from django.contrib.auth.decorators import login_required
 from django.core.paginator import Paginator
 from django.db.models import Count
+from django.http import HttpResponseRedirect
 from django.shortcuts import render, redirect, get_object_or_404
+from django.urls import reverse
 
-from web.forms import RegistrationForm, AuthForm, AddPostForm, PostFilterForm
-from web.models import Post
+from web.forms import (
+    RegistrationForm,
+    AuthForm,
+    AddPostForm,
+    PostFilterForm,
+    AddNewForm,
+    AddCommentForm,
+)
+from web.models import Post, New, Comment, Like
 
 User = get_user_model()
 
 
 def main_view(request):
     posts = Post.objects.all().order_by("-date")
+    news = New.objects.all().order_by("-date")
 
     filter_form = PostFilterForm(request.GET)
     filter_form.is_valid()
@@ -35,17 +45,14 @@ def main_view(request):
         "web/home.html",
         {
             "posts": paginator.get_page(page_number),
+            "comment_form": AddCommentForm(),
+            "news": news,
             "form": AddPostForm(),
+            "new_form": AddNewForm(),
             "filter_form": filter_form,
             "total_count": total_count,
         },
     )
-
-
-def my_page_view(request):
-    posts = Post.objects.filter(user=request.user).order_by("-date")
-    year = datetime.now().year
-    return render(request, "web/home.html", {"posts": posts, "form": AddPostForm()})
 
 
 @login_required
@@ -62,7 +69,9 @@ def registration_view(request):
         form = RegistrationForm(data=request.POST)
         if form.is_valid():
             user = User(
-                username=form.cleaned_data["username"], email=form.cleaned_data["email"]
+                name=form.cleaned_data["username"],
+                email=form.cleaned_data["email"],
+                phone=form.cleaned_data["phone"],
             )
             user.set_password(form.cleaned_data["password"])
             user.save()
@@ -122,3 +131,102 @@ def edit_post_view(request, id=None):
     else:
         form = AddPostForm(instance=post)
     return render(request, "web/post_form.html", {"form": form})
+
+
+@login_required
+def add_new_view(request):
+    form = AddNewForm()
+    if request.method == "POST":
+        form = AddNewForm(data=request.POST, initial={"user": request.user})
+        if form.is_valid():
+            new = New(
+                title=form.cleaned_data["title"],
+                description=form.cleaned_data["description"],
+                author_id=request.user.id,
+            )
+            new_photo = request.FILES["photo"]
+            new.photo = new_photo
+            new.save()
+            print(form.cleaned_data)
+            return redirect("main")
+    return render(request, "web/new_form.html", {"new_form": form})
+
+
+# def get_absolute_url(self):
+#     return "/user/%i/" % self.id
+
+
+def get_absolute_url(self):
+    from django.urls import reverse
+
+    return reverse("user.views.details", args=[str(self.id)])
+
+
+def profile_view(request, id=None):
+    user = get_object_or_404(User, id=id)
+    if user == request.user:
+        return my_page_view(request)
+    posts = Post.objects.filter(author=user).order_by("-date")
+    return render(
+        request,
+        "web/profile.html",
+        {"posts": posts, "the_user": user, "comment_form": AddCommentForm},
+    )
+
+
+def my_page_view(request):
+    posts = Post.objects.filter(author=request.user).order_by("-date")
+    change_profile_photo(request)
+    return render(
+        request,
+        "web/my_page.html",
+        {
+            "form": AddPostForm(),
+            "posts": posts,
+            "photo": request.user.photo,
+            "comment_form": AddCommentForm,
+        },
+    )
+
+
+def change_profile_photo(request):
+    if request.method == "POST":
+        profile_photo = request.FILES["profile_photo"]
+        user = request.user
+
+        user.photo = profile_photo
+        user.save()
+
+
+def add_comment_view(request, id_post=None):
+    post = get_object_or_404(Post, id=id_post)
+    form = AddCommentForm()
+    if request.method == "POST":
+        form = AddCommentForm(data=request.POST, initial={"user": request.user})
+        if form.is_valid():
+            comment = Comment(
+                author=request.user, text=form.cleaned_data["text"], post=post
+            )
+            comment.save()
+            print(form.cleaned_data)
+            return redirect("main")
+    return render(request, "web/comment_form.html", {"comment_form": form})
+
+
+def add_or_remove_like(request, id_post=None):
+    post = get_object_or_404(Post, id=id_post)
+    user = request.user
+
+    if not post.likes.filter(user_id=user.id).first():
+        like = Like.objects.create(user=user, post=post)
+        return like
+    else:
+        like = post.likes.filter(user_id=user.id).first()
+        like.delete_like(Like, user.id, post.id)
+
+
+def get_like_count(request, id_post=None):
+    post = get_object_or_404(Post, id=id_post)
+    if request.method == "GET":
+        likeCount = post.likes.all().count()
+        return render(request, likeCount)
