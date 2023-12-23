@@ -18,8 +18,6 @@ class NewAdmin(admin.ModelAdmin):
 
 
 class CommentAdmin(admin.ModelAdmin):
-
-    
     list_display = ("id", "text", "post_id", "date")
     search_fields = ("id", "title", "post_id")
     list_filter = ("id", "post_id", "date")
