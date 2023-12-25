@@ -1,42 +1,185 @@
 {%extends 'web/base.html' %}
+<head>
+    <style>
+        .material-symbols-rounded {
+            background-color: white;
+            border: none;
+            color: black;
+            cursor: pointer;
+            padding: 0px 0px;
+            text-align: center;
+            text-decoration: none;
+            display: inline-block;
+            margin-right: 10px;
+            margin-left: 10px;
+            font-variation-settings:
+                    'FILL' 0,
+                    'wght' 400,
+                    'GRAD' 0,
+                    'opsz' 24
+        }
+        .material-symbols-rounded.red {
+            color: red;
+            font-variation-settings:
+                    'FILL' 0,
+                    'wght' 400,
+                    'GRAD' 0,
+                    'opsz' 24
+        }
+    </style>
+
+
+</head>
 {% block content %}
-Hello! {{year}}
-{% if not user.anonymous%}
-<p>Привет <b></b></p>
-{% endif %}
-
-<b>Создать пост</b>
-<form action="{% url 'posts_add' %}" method="post">
-    {% csrf_token %}
-    {{ form.as_p }}
-    <button>Сохранить</button>
-</form>
-
-<hr>
-<form action="">
-    <b>Фильтр:</b><br>
-    {% for field in filter_form %}
-        {{ field }}
-    {% endfor %}
-    <button>Найти</button>
-</form>
-
+<div class="container">
 <ul>
-    {% for post in posts%}
+
+    <center><h2>Новости</h2></center>
+<center><div class="col-9">
+    <div id="carouselExampleIndicators" class="carousel slide" data-bs-ride="carousel">
+  <div class="carousel-indicators">
+    <button type="button" data-bs-target="#carouselExampleIndicators" data-bs-slide-to="0" class="active" aria-current="true" aria-label="Slide 1"></button>
+    <button type="button" data-bs-target="#carouselExampleIndicators" data-bs-slide-to="1" aria-label="Slide 2"></button>
+    <button type="button" data-bs-target="#carouselExampleIndicators" data-bs-slide-to="2" aria-label="Slide 3"></button>
+  </div>
+  <div class="carousel-inner">
+      {% for new in news %}
+    <div class="carousel-item active">
+      <img src="/media/{{new.photo}}" class="d-block w-100" alt="...">
+      <div class="carousel-caption d-none d-md-block">
+        <h5>{{ new.title }}</h5>
+        <p>{{ new.description }}</p>
+      </div>
+    </div>
+      {% endfor %}
+<!--      <div class="carousel-item">-->
+<!--          <img src="/media/{{new.photo}}" class="d-block w-100" alt="...">-->
+<!--          <div class="carousel-caption d-none d-md-block">-->
+<!--            <h5>{{ new.title }}</h5>-->
+<!--            <p>{{ new.description }}</p>-->
+<!--          </div>-->
+<!--        </div>-->
+
+  </div>
+  <button class="carousel-control-prev" type="button" data-bs-target="#carouselExampleIndicators"  data-bs-slide="prev">
+    <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+    <span class="visually-hidden">Предыдущий</span>
+  </button>
+  <button class="carousel-control-next" type="button" data-bs-target="#carouselExampleIndicators"  data-bs-slide="next">
+    <span class="carousel-control-next-icon" aria-hidden="true"></span>
+    <span class="visually-hidden">Следующий</span>
+  </button>
+</div>
+</div></center>
+<br>
+{% if user.role == "ADMIN" %}
+    <div class="row">
+    <div class="col-2"></div>
+    <div class="col-8">
+        <div class="card p-3 border shadow-sm p-3 mb-5 bg-white rounded">
+        <p>Привет admin <b></b></p>
+        <b>Опубликовать новость</b>
+        <form action="{% url 'new_add' %}" method="post" enctype="multipart/form-data">
+            {% csrf_token %}
+            {{ new_form.as_p }}
+            <input type="file" id="upload" style="display: none;" name="profile_photo" >
+            <label for="upload" class="btn btn-primary">Опубликовать</label>
+        </form>
+
+        </div>
+        <hr>
+        <div class="col-2"></div>
+    </div>
+    </div>
+{% endif %}
+<br>
+</ul>
+
+    <center>
+        <form action="">
+            <b>Фильтр:</b><br>
+            {% for field in filter_form %}
+                {{ field }}
+            {% endfor %}
+            <button>Найти</button>
+        </form>
+    </center>
+
+    <br>
+<ul>
+    <div class="row">
+    <div class="col-2"></div>
+    <div class="col-8">
+        <div class="card p-3 border shadow-sm p-3 mb-5 bg-white rounded">
+        {% if not user.is_anonymous%}
+        <b>Создать пост</b>
+        <form action="{% url 'posts_add' %}" method="post">
+            {% csrf_token %}
+            {{ form.as_p }}
+            <button type="submit" class="btn btn-primary">Сохранить</button>
+        </form>
+        {% endif %}
+        </div>
+    </div>
+        <div class="col-2"></div>
+    </div>
+    {% for post in posts %}
     <br>
     <br>
+    <div class="row">
+    <div class="col-2"></div>
+    <div class="col-8">
     <article>
-        <h2>{{ post.author }}</h2>
-        <b>{{ post.title }}</b>
+        <div class="card ">
+          <div class="card-header" ><h3><a href="user/{{post.author.id}}/">{{ post.author }}</a></h3></div>
+          <div class="card-body">
+            <h5 class="card-title">{{ post.title }}</h5>
+            <p class="card-text">{{ post.text }}</p>
+          </div>
+            <div>
+                <div class="card-footer text-muted">
+                {{post.date}}
+                {% if post.author == request.user %}
+                    <a class="position-absolute bottom-25 end-0" href="{% url 'posts_edit' post.id %}">редактировать</a>
+                {% endif %}
+                <span class="material-symbols-rounded" style="cursor: pointer" id="likeButton" onclick="likePost({{ post.id }})">favorite</span>
+<!--                <button class="material-symbols-rounded" id="likeButton" onclick="likePost({{ post.id }})">favorite</button>-->
+                <span class="like-count" id="likeCount">0</span>
+                </div>
+
+            </div>
+        </div>
+
         <br>
-        {{ post.text }}
+
+        {% for comment in post.comments.all %}
+            <b><a href="user/{{comment.author.id}}/">{{comment.author}}</a></b>
+            <br>
+            {{comment.text}}
+            <br>
+            <small>{{comment.date}}</small>
+            <br>
+            <hr>
+        {% endfor %}
+
+        {% if not user.is_anonymous%}
         <br>
-        <small>{{post.date}}</small>
-        <a href="{% url 'posts_edit' post.id %}">редактировать</a>
+        <b>Добавить комментарий</b>
+        <form action="comment/add/{{post.id}}/" method="post">
+            {% csrf_token %}
+            {{ comment_form.text}}
+            <br>
+            <button type="submit" class="btn btn-primary">Отправить</button>
+        </form>
+        {% endif %}
     </article>
+    </div>
+    <div class="col-2"></div>
+    </div>
     {% endfor %}
 </ul>
 
+    <center>
 Всего {{ total_count }} постов
 <nav>
     {% if posts.has_previous %}
@@ -51,5 +194,67 @@ Hello! {{year}}
     <a href="?page={{ posts.paginator.num_pages }}">в конец</a>
     {% endif %}
 </nav>
+    </center>
+</div>
+</center>
+
+
+<script>
+    var likeBtns = document.querySelectorAll('.material-symbols-rounded');
+
+    for (var i = 0; i < likeBtns.length; i++) {
+        var btn = likeBtns[i];
+        btn.addEventListener('click', function() {
+            var countSpan = this.nextElementSibling;
+            var count = parseInt(countSpan.textContent);
+            if (this.style.color == 'red') {
+                count--;
+                this.style.color = 'initial'
+
+            } else {
+                count++;
+                this.style.color = 'red'
+            }
+            countSpan.textContent = count;
+        });
+    }
+</script>
+
+
+<script>
+var likeCount = 0;
+var hasLiked = false;
+
+// Функция для отправки запроса на сервер
+function sendRequest(url, method, data, callback) {
+  var xhr = new XMLHttpRequest();
+  xhr.open(method, url, true);
+  xhr.setRequestHeader('Content-Type', 'application/json');
+  xhr.onreadystatechange = function() {
+    if (xhr.readyState === 4 && xhr.status === 200) {
+      callback(JSON.parse(xhr.responseText));
+    }
+  };
+  xhr.send(JSON.stringify(data));
+}
+
+// Функция для получения количества лайков из базы данных
+function getLikeCount(id_post) {
+  sendRequest('/like/count/', 'GET', id_post, null, function(response) {
+    likeCount = response.likeCount;
+    document.getElementById('likeCount').innerText = likeCount;
+  });
+}
+
+// Функция для обновления количества лайков в базе данных
+function updateLikeCount(likeCount, id_post) {
+  sendRequest('/like', 'POST', { "likeCount": likeCount,  "id_post": id_post}, function(response) {
+    // Обработка ответа от сервера
+  });
+}
+
+// Получаем начальное количество лайков при загрузке страницы
+getLikeCount();
+</script>
 
 {% endblock %}

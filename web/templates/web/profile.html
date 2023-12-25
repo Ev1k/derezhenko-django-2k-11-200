@@ -1,0 +1,45 @@
+{%extends 'web/base.html' %}
+{% block content %}
+
+<div class="container">
+
+<img src="/media/{{the_user.photo}}" alt="avatar" width="300">
+<h2>{{the_user.name}}</h2>
+<h2>{{the_user.email}}</h2>
+<br>
+
+<ul>
+    {% for post in posts%}
+    <br>
+    <br>
+    <article>
+        <b>{{ post.title }}</b>
+        <br>
+        {{ post.text }}
+        <br>
+        <small>{{post.date}}</small>
+        <br>
+        {% for comment in post.comments.all %}
+        <b><a href="{{comment.author.get_absolute_url}}">{{comment.author}}</a></b>
+            <br>
+            {{comment.text}}
+            <br>
+            <small>{{comment.date}}</small>
+        {% endfor %}
+
+        {% if not request.user.is_anonymous %}
+        <br>
+        <br>
+        <b>Добавить комментарий</b>
+        <form action="http://127.0.0.1:8000/comment/add/{{post.id}}/" method="post">
+            {% csrf_token %}
+            {{ comment_form.text}}
+            <button type="submit" class="btn btn-primary">Отправить</button>
+        </form>
+        {% endif %}
+    </article>
+    {% endfor %}
+</ul>
+</div>
+
+{% endblock %}

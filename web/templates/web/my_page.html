@@ -1,15 +1,66 @@
 {%extends 'web/base.html' %}
+<head>
+    <style>
+
+    </style>
+</head>
 {% block content %}
-{% if user.is_authorised %}
-<h3>{% request.user.username %}</h3>
-{% endif %}
-<b>Создать пост</b>
-<form action="{% url 'posts_add' %}" method="post">
-    {% csrf_token %}
-    {{ form.as_p }}
-    <button>Сохранить</button>
-</form>
-<!-- <a href="{% url 'posts_add' %}">Создать пост</a> -->
+<div class="container">
+    <div class="row">
+    <div class="col-2"></div>
+    <div class="col-8">
+
+<div class="row>">
+    <div class="square">
+        <dl class="row">
+            <div class="col-4">
+        <img class="rounded-circle img-fluid" style="width: 200px; height: 200px; object-fit: cover;" src="/media/{{photo}}" alt="avatar" width="300">
+            <form action="" method="post" enctype="multipart/form-data">
+                {% csrf_token %}
+                <span id="file-name"></span><br>
+                <div class="row">
+                    <div class="col">
+                        <input type="file" id="upload" style="display: none;" name="profile_photo" required onchange="updateFileName(this)">
+                        <label for="upload" class="btn btn-primary">Загрузить</label>
+                    </div>
+                    <div class="col">
+                    <input class="btn btn-outline-primary" type="submit" value="Сохранить">
+                        </div>
+                </div>
+            </form>
+                <script>
+                function updateFileName(input) {
+                  var fileName = input.files[0].name;
+                  document.getElementById('file-name').innerText = fileName;
+                }
+                </script>
+            </div>
+
+
+          <div class="col-8">
+            <dl class="row">
+                <dt class="col-4"><h5>Имя пользователя</h5></dt>
+                <dd class="col-8"><h5>{{user.name}}</h5></dd>
+                <br>
+                <dt class="col-4"><h5>Email</h5></dt>
+                <dd class="col-8"><h5>{{user.email}}</h5></dd>
+
+            </dl>
+        </div>
+        </dl>
+    </div>
+
+    </div>
+<br>
+<br>
+        <div class="card p-3 border shadow-sm p-3 mb-5 bg-white rounded">
+            <b>Создать пост</b>
+            <form action="{% url 'posts_add' %}" method="post">
+                {% csrf_token %}
+                {{ form.as_p }}
+                <button type="submit" class="btn btn-primary">Сохранить</button>
+            </form>
+        </div>
 <ul>
     {% for post in posts%}
     <br>
@@ -21,8 +72,32 @@
         <br>
         <small>{{post.date}}</small>
         <a href="{% url 'posts_edit' post.id %}">редактировать</a>
+
+        <br>
+        {% for comment in post.comments.all %}
+        <br>
+            <b><a href="user/{{comment.author.id}}/">{{comment.author}}</a></b>
+            <br>
+            {{comment.text}}
+            <br>
+            <small>{{comment.date}}</small>
+        <br>
+        {% endfor %}
+
+        <br>
+        <br>
+        <b>Добавить комментарий</b>
+        <form action="comment/add/{{post.id}}/" method="post">
+            {% csrf_token %}
+            {{ comment_form.text }}
+            <button type="submit" class="btn btn-primary">Отправить</button>
+        </form>
     </article>
     {% endfor %}
 </ul>
+    </div>
+    <div class="col-2"></div>
+</div>
+</div>
 
 {% endblock %}

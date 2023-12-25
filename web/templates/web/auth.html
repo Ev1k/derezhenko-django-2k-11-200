@@ -1,9 +1,19 @@
 {%extends 'web/base.html' %}
 {% block content %}
-<h2>Автоизация</h2>
-<form action="" method="post">
+<div class="container">
+
+<center><h2>Авторизация</h2></center>
+  <div class="row">
+  <div class="col-3"></div>
+  <div class="col-6">
+    <form action="" method="post">
     {% csrf_token %}
     {{ form.as_p }}
-    <button>Войти</button>
-</form>
+    <button type="submit" class="btn btn-primary">Войти</button>
+    </form>
+  </div>
+  <div class="col-3"></div>
+    </div>
+
+</div>
 {% endblock %}
